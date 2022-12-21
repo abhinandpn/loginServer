@@ -1,4 +1,4 @@
-module loginPage
+module github.com/Nikhilnaryanan/loginPage
 
 go 1.19
 

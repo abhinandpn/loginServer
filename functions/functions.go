@@ -2,11 +2,11 @@ package functions
 
 import (
 	"fmt"
-	"loginPage/localdb"
 	"net/http"
 	"text/template"
 	"time"
 
+	"github.com/Nikhilnaryanan/loginPage/localdb"
 	"github.com/google/uuid"
 )
 
@@ -50,6 +50,7 @@ var regError = regFormErrors{}
 // these functions are hndler functions
 
 func RegisterPage(w http.ResponseWriter, r *http.Request) {
+
 	fmt.Println("regPage")
 
 	if _, ok := sessionAndCookie(r); ok {

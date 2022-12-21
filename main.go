@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"loginPage/functions"
-	"loginPage/localdb"
 	"net/http"
+
+	"github.com/Nikhilnaryanan/loginPage/functions"
+	"github.com/Nikhilnaryanan/loginPage/localdb"
 
 	"github.com/gorilla/mux"
 )
@@ -32,7 +32,5 @@ func main() {
 
 	fmt.Println("Server running at ", port)
 
-	if err := http.ListenAndServe(port, r); err != nil {
-		log.Fatal(err)
-	}
+	http.ListenAndServe(port, r)
 }
