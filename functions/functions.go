@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/nikhilnaryanan623/loginServer/localdb"
+	"github.com/nikhilnarayanan623/loginServer/localdb"
 )
 
 // varables
