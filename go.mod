@@ -1,4 +1,4 @@
-module github.com/Nikhilnaryanan/loginServer
+module github.com/nikhilnaryanan623/loginServer
 
 go 1.19
 

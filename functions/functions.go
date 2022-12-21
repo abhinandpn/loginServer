@@ -6,8 +6,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/Nikhilnaryanan/loginServer/localdb"
 	"github.com/google/uuid"
+	"github.com/nikhilnaryanan623/loginServer/localdb"
 )
 
 // varables

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Nikhilnaryanan/loginServer/functions"
-	"github.com/Nikhilnaryanan/loginServer/localdb"
+	"github.com/nikhilnaryanan623/loginServer/functions"
+	"github.com/nikhilnaryanan623/loginServer/localdb"
 
 	"github.com/gorilla/mux"
 )
