@@ -6,7 +6,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/Nikhilnaryanan/loginPage/localdb"
+	"github.com/Nikhilnaryanan/loginServer/localdb"
 	"github.com/google/uuid"
 )
 
