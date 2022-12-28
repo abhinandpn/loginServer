@@ -1,79 +1,37 @@
-package functions
+package controllers
 
 import (
 	"fmt"
 	"net/http"
-	"text/template"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/nikhilnarayanan623/loginServer/helper"
 	"github.com/nikhilnarayanan623/loginServer/localdb"
 )
-
-// varables
-
-var Home = "home.html"
-var HomePath = "pages/home.html"
-var Login = "login.html"
-var LoginPath = "pages/login.html"
-var Register = "register.html"
-var RegisterPath = "pages/register.html"
-
-var cookieId string
-
-//varables
-
-// if error get when parsing templte use this pages
-var ErrorPage = "errorPage.html"
-var ErrorPagePath = "pages/errorPage.html"
-
-//message struct for login form
-
-type Messages struct {
-	Color   string
-	Message string
-}
-
-// this have the message what we want to show in login
-var loginMessage = Messages{}
-
-// struct to store all eroors what user made when user registering using boolean value
-// if a fiels is flase means its no error otherwise there is an error
-type regFormErrors struct {
-	ErrorName  bool
-	ErrorEmail bool
-	ErrorPass  bool
-}
-
-var regError = regFormErrors{}
 
 // these functions are hndler functions
 
 func RegisterPage(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("regPage")
-
-	if _, ok := sessionAndCookie(r); ok {
+	if _, ok := helper.SessionAndCookie(r); ok {
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 		return
 	}
 	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 
-	regTmpl := createTemplate(Register, RegisterPath)
-
-	regTmpl.Execute(w, regError)
+	regTmpl := helper.CreateTemplate(localdb.Register, localdb.RegisterPath)
+	regTmpl.Execute(w, localdb.RegError)
 }
 
 // register submit
 func RegisterSubmit(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("regSub")
 
-	if _, ok := sessionAndCookie(r); ok {
+	if _, ok := helper.SessionAndCookie(r); ok {
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 		return
 	}
 	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-
 	//get values from fom
 	fName := r.PostFormValue("name")   //form name
 	fEmail := r.PostFormValue("email") //form mail
@@ -82,30 +40,28 @@ func RegisterSubmit(w http.ResponseWriter, r *http.Request) {
 
 	// validate the user value
 	if fName == "" {
-		regError.ErrorName = true
+		localdb.RegError.ErrorName = true
 	}
 	if fEmail == "" {
-		regError.ErrorEmail = true
+		localdb.RegError.ErrorEmail = true
 	}
 	if fPass1 == "" || fPass2 == "" || fPass1 != fPass2 {
-		regError.ErrorPass = true
+		localdb.RegError.ErrorPass = true
 	}
 
 	//check the entered user is alredy exist
-
 	if _, ok := localdb.DataBase[fEmail]; ok {
 
-		loginMessage.Color = "text-success"
-		loginMessage.Message = "You are already a User"
-		clearRegError()
+		localdb.LoginMessage.Color = "text-success"
+		localdb.LoginMessage.Message = "You are already a User"
+
 		http.Redirect(w, r, "/", http.StatusSeeOther) //render login page to show the message
 		return
 	}
 
 	//check anyting in regError is have a error as true
 	//then render same page with showing this errors
-	if regError.ErrorEmail || regError.ErrorName || regError.ErrorPass {
-		fmt.Println(regError, "reg error")
+	if localdb.RegError.ErrorEmail || localdb.RegError.ErrorName || localdb.RegError.ErrorPass {
 		http.Redirect(w, r, "/register", http.StatusSeeOther)
 		return
 	}
@@ -118,8 +74,8 @@ func RegisterSubmit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//set login text class and message
-	loginMessage.Color = "text-success"
-	loginMessage.Message = "Successfully Registered Login Please"
+	localdb.LoginMessage.Color = "text-success"
+	localdb.LoginMessage.Message = "Successfully Registered Login Please"
 
 	clearRegError()
 	//redirect to login page
@@ -128,36 +84,36 @@ func RegisterSubmit(w http.ResponseWriter, r *http.Request) {
 }
 
 func clearRegError() {
-	//clear all error in regError
-	regError.ErrorEmail = false
-	regError.ErrorName = false
-	regError.ErrorPass = false
+	localdb.RegError.ErrorEmail = false
+	localdb.RegError.ErrorName = false
+	localdb.RegError.ErrorPass = false
 }
 
 func LoginPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("LoginPage")
 
-	if _, ok := sessionAndCookie(r); ok {
+	if _, ok := helper.SessionAndCookie(r); ok {
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 		return
 	}
 
 	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 	//session is not avaliable then render login page
+	clearRegError() //to clear register form errors
 
-	tmpl := createTemplate(Login, LoginPath)
-	tmpl.Execute(w, loginMessage)
+	tmpl := helper.CreateTemplate(localdb.Login, localdb.LoginPath)
+	tmpl.Execute(w, localdb.LoginMessage)
 
 	//clear all login error messages
-	loginMessage.Color = ""
-	loginMessage.Message = ""
+	localdb.LoginMessage.Color = ""
+	localdb.LoginMessage.Message = ""
 }
 
 func LoginSubmit(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Login submit start")
 
-	if _, ok := sessionAndCookie(r); ok {
+	if _, ok := helper.SessionAndCookie(r); ok {
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 		return
 	}
@@ -169,8 +125,8 @@ func LoginSubmit(w http.ResponseWriter, r *http.Request) {
 	//check user entered email
 	if userEmail == "" {
 		//setting
-		loginMessage.Color = "text-danger"
-		loginMessage.Message = "Enter Email Properly"
+		localdb.LoginMessage.Color = "text-danger"
+		localdb.LoginMessage.Message = "Enter Email Properly"
 		//after setting message call login handler to render login page
 		LoginPage(w, r)
 		return
@@ -181,28 +137,26 @@ func LoginSubmit(w http.ResponseWriter, r *http.Request) {
 
 	//check user is exist or not then check password
 	if !ok {
-		loginMessage.Color = "text-danger"
-		loginMessage.Message = "You are not a registered User! you can register"
+		localdb.LoginMessage.Color = "text-danger"
+		localdb.LoginMessage.Message = "You are not a registered User! you can register"
 
 		LoginPage(w, r)
 		return
 	} else if userPass != singleUser.Pass { // user exist password not match
-		loginMessage.Color = "text-danger"
-		loginMessage.Message = "Incorrect Password"
+		localdb.LoginMessage.Color = "text-danger"
+		localdb.LoginMessage.Message = "Incorrect Password"
 
 		LoginPage(w, r)
 		return
 	}
 	//create session
-	userName := singleUser.Name
-
 	sessionToken := uuid.NewString() //create a new random session token
 
 	//sessionToken := "token"
-	sessionTime := time.Now().Add(2 * time.Hour) //expire time current time plus two minute
+	sessionTime := time.Now().Add(3 * time.Minute) //expire time current time plus two minute
 
 	newSession := localdb.Session{
-		Name:   userName,
+		Name:   singleUser.Name,
 		Expire: sessionTime,
 	}
 
@@ -216,18 +170,15 @@ func LoginSubmit(w http.ResponseWriter, r *http.Request) {
 		Expires: sessionTime,
 	}
 	http.SetCookie(w, newCookie)
-	//time.Sleep(2 * time.Second)
 
 	HomePage(w, r)
-
 }
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("home page ")
 	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 
-	session, ok := sessionAndCookie(r)
+	session, ok := helper.SessionAndCookie(r)
 
 	if !ok { //if session no availabe
 
@@ -235,8 +186,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	homeTmpl := createTemplate(Home, HomePath)
-
+	homeTmpl := helper.CreateTemplate(localdb.Home, localdb.HomePath)
 	homeTmpl.Execute(w, session)
 }
 
@@ -244,78 +194,24 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Logout page ")
 	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 
-	_, ok := sessionAndCookie(r)
+	_, ok := helper.SessionAndCookie(r)
 
-	if !ok {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+	if ok {
+		delete(localdb.SessionsDB, localdb.CookieId)
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// this function check the user is entering invalid url from login page or home according to that function redirect to that page
+func ErrorHandleFunc(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+
+	if _, ok := helper.SessionAndCookie(r); ok {
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
 		return
 	}
 
-	//get cookie and delte session using that cookie
-	// if cokkieVal, ok := getCookieVal(r); ok {
-	// 	delete(localdb.SessionsDB, cokkieVal)
-	// }
-
-	delete(localdb.SessionsDB, cookieId)
-
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-	//LoginPage(w, r)
-}
-
-func ErrorHandleFunc(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("error page")
-	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-
-	if _, ok := sessionAndCookie(r); ok {
-		http.Redirect(w, r, "/home", http.StatusSeeOther)
-	}
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-}
-
-// these funtions are used to help other function
-func createTemplate(name string, path string) *template.Template {
-
-	tmpl, err := template.New(name).ParseFiles(path)
-
-	if checkError(err, "tempate "+name) { //to check error
-		//if found error parse error page
-		errTmpl, _ := template.New(ErrorPage).ParseFiles(ErrorPagePath)
-		return errTmpl
-	}
-
-	return tmpl
-}
-
-func checkError(err error, name string) bool {
-	if err != nil {
-		fmt.Println("Error found at ", name)
-		return true
-	}
-
-	return false
-}
-
-func sessionAndCookie(r *http.Request) (localdb.Session, bool) {
-
-	if cookieVal, ok1 := getCookieVal(r); ok1 {
-
-		if session, ok2 := localdb.SessionsDB[cookieVal]; ok2 {
-			return session, true
-		}
-	}
-
-	return localdb.Session{}, false //return nill session
-}
-
-// get cookie if need
-func getCookieVal(r *http.Request) (string, bool) {
-	cookie, err := r.Cookie("session") // session is the cookie name
-
-	if checkError(err, "Error at getting Cokkie") {
-		fmt.Println("session and cokkie func error to get cookie")
-		return "", false
-	}
-	cookieId = cookie.Value
-	return cookie.Value, true
 }

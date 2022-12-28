@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/nikhilnarayanan623/loginServer/functions"
+	"github.com/nikhilnarayanan623/loginServer/controllers"
 	"github.com/nikhilnarayanan623/loginServer/localdb"
 
 	"github.com/gorilla/mux"
@@ -21,15 +21,14 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.HandleFunc("/", functions.LoginPage)
-	r.HandleFunc("/submit", functions.LoginSubmit)
-	r.HandleFunc("/home", functions.HomePage)
-	r.HandleFunc("/register", functions.RegisterPage)
-	r.HandleFunc("/registerSubmit", functions.RegisterSubmit)
-	r.HandleFunc("/logout", functions.Logout)
-
-	r.NotFoundHandler = http.HandlerFunc(functions.ErrorHandleFunc)
-
+	r.HandleFunc("/", controllers.LoginPage).Methods("GET")
+	r.HandleFunc("/", controllers.LoginSubmit).Methods("POST")
+	r.HandleFunc("/home", controllers.HomePage)
+	r.HandleFunc("/register", controllers.RegisterPage).Methods("GET")
+	r.HandleFunc("/register", controllers.RegisterSubmit).Methods("POST")
+	r.HandleFunc("/logout", controllers.Logout)
+	//no handler found use these handler
+	r.NotFoundHandler = http.HandlerFunc(controllers.ErrorHandleFunc)
 	fmt.Println("Server running at ", port)
 
 	http.ListenAndServe(port, r)
